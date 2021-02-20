@@ -64,29 +64,18 @@ export class Gulpfile {
             "!./src/commands/*.ts",
             "!./src/cli.ts",
             "!./src/typeorm.ts",
-            "!./src/typeorm-model-shim.ts",
-            "!./src/platform/PlatformTools.ts"
+            "!./src/typeorm-model-shim.ts"
         ])
         .pipe(gulp.dest("./build/browser/src"));
     }
 
     /**
-     * Replaces PlatformTools with browser-specific implementation called BrowserPlatformTools.
+     * Copies templates for compilation
      */
     @Task()
-    browserCopyPlatformTools() {
-        return gulp.src("./src/platform/BrowserPlatformTools.template")
-            .pipe(rename("PlatformTools.ts"))
-            .pipe(gulp.dest("./build/browser/src/platform"));
-    }
-
-    /**
-     * Adds dummy classes for disabled drivers (replacement is done via browser entry point in package.json)
-     */
-    @Task()
-    browserCopyDisabledDriversDummy() {
-        return gulp.src("./src/platform/BrowserDisabledDriversDummy.template")
-            .pipe(rename("BrowserDisabledDriversDummy.ts"))
+    browserCopyTemplates() {
+        return gulp.src("./src/platform/*.template")
+            .pipe(rename((p: any) => { p.extname = '.ts'; }))
             .pipe(gulp.dest("./build/browser/src/platform"));
     }
 
@@ -97,7 +86,10 @@ export class Gulpfile {
             "lib": ["es5", "es6", "dom"],
             typescript: require("typescript")
         });
-        const tsResult = gulp.src(["./build/browser/src/**/*.ts", "./node_modules/reflect-metadata/**/*.d.ts", "./node_modules/@types/**/*.ts"])
+        const tsResult = gulp.src([
+            "./build/browser/src/**/*.ts",
+            "./node_modules/reflect-metadata/**/*.d.ts"
+        ])
             .pipe(sourcemaps.init())
             .pipe(tsProject());
 
@@ -151,8 +143,7 @@ export class Gulpfile {
             typescript: require("typescript")
         });
         const tsResult = gulp.src([
-            "./src/**/*.ts",
-            "./node_modules/@types/**/*.ts",
+            "./src/**/*.ts"
         ])
             .pipe(sourcemaps.init())
             .pipe(tsProject());
@@ -231,7 +222,7 @@ export class Gulpfile {
     package() {
         return [
             "clean",
-            ["browserCopySources", "browserCopyPlatformTools", "browserCopyDisabledDriversDummy"],
+            ["browserCopySources", "browserCopyTemplates"],
             ["packageCompile", "browserCompile"],
             "packageMoveCompiledFiles",
             [

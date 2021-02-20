@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import appRootPath from "app-root-path";
 import {ConnectionOptions} from "./ConnectionOptions";
 import {PlatformTools} from "../platform/PlatformTools";
@@ -93,34 +92,37 @@ export class ConnectionOptionsReader {
             return PlatformTools.fileExist(this.baseFilePath + "." + format);
         });
 
-        // if .env file found then load all its variables into process.env using dotenv package
-        if (foundFileFormat === "env") {
-            dotenv.config({ path: this.baseFilePath });
-        } else if (PlatformTools.fileExist(".env")) {
-            dotenv.config({ path: ".env" });
-        }
-
         // Determine config file name
         const configFile = fileExtension ? this.baseFilePath : this.baseFilePath + "." + foundFileFormat;
 
+        // if .env file found then load all its variables into process.env using dotenv package
+        if (foundFileFormat === "env") {
+            PlatformTools.dotenv(configFile);
+        } else if (PlatformTools.fileExist(this.baseDirectory + "/.env")) {
+            PlatformTools.dotenv(this.baseDirectory + "/.env");
+        }
+
         // try to find connection options from any of available sources of configuration
-        if (PlatformTools.getEnvVariable("TYPEORM_CONNECTION") || PlatformTools.getEnvVariable("TYPEORM_URL")) {
-            connectionOptions = new ConnectionOptionsEnvReader().read();
+        if (PlatformTools.getEnvVariable("TYPEORM_CONNECTION") || PlatformTools.getEnvVariable("TYPEORM_URL")) {
+            connectionOptions = await new ConnectionOptionsEnvReader().read();
 
-        } else if (foundFileFormat === "js" || foundFileFormat === "cjs") {
-            connectionOptions = await require(configFile);
+        } else if (foundFileFormat === "js" || foundFileFormat === "cjs" || foundFileFormat === "ts") {
+            const configModule = await require(configFile);
 
-        } else if (foundFileFormat === "ts") {
-            connectionOptions = await require(configFile);
+            if (configModule && "__esModule" in configModule && "default" in configModule) {
+                connectionOptions = configModule.default;
+            } else {
+                connectionOptions = configModule;
+            }
 
         } else if (foundFileFormat === "json") {
             connectionOptions = require(configFile);
 
         } else if (foundFileFormat === "yml") {
-            connectionOptions = new ConnectionOptionsYmlReader().read(configFile);
+            connectionOptions = await new ConnectionOptionsYmlReader().read(configFile);
 
         } else if (foundFileFormat === "yaml") {
-            connectionOptions = new ConnectionOptionsYmlReader().read(configFile);
+            connectionOptions = await new ConnectionOptionsYmlReader().read(configFile);
 
         } else if (foundFileFormat === "xml") {
             connectionOptions = await new ConnectionOptionsXmlReader().read(configFile);

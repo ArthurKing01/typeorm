@@ -195,7 +195,7 @@ export class PostRefactoringTIMESTAMP implements MigrationInterface {
 ```
 
 See, you don't need to write the queries on your own.
-The rule of thumb for generating migrations is that you generate them after "each" change you made to your models.
+The rule of thumb for generating migrations is that you generate them after "each" change you made to your models. To apply multi-line formatting to your generated migration queries, use the `p` (alias for `--pretty`) flag.
 
 ## Connection option
 If you need to run/revert your migrations for another connection rather than the default, use the `-c` (alias for `--connection`) and pass the config name as an argument
@@ -269,10 +269,10 @@ export class QuestionRefactoringTIMESTAMP implements MigrationInterface {
     }
 
     async down(queryRunner: QueryRunner): Promise<void> {
-        const table = await queryRunner.getTable("question");
+        const table = await queryRunner.getTable("answer");
         const foreignKey = table.foreignKeys.find(fk => fk.columnNames.indexOf("questionId") !== -1);
-        await queryRunner.dropForeignKey("question", foreignKey);
-        await queryRunner.dropColumn("question", "questionId");
+        await queryRunner.dropForeignKey("answer", foreignKey);
+        await queryRunner.dropColumn("answer", "questionId");
         await queryRunner.dropTable("answer");
         await queryRunner.dropIndex("question", "IDX_QUESTION_NAME");
         await queryRunner.dropTable("question");
