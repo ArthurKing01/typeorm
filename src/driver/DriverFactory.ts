@@ -41,6 +41,8 @@ export class DriverFactory {
                 return new MysqlDriver(connection);
             case "sqlite":
                 return new SqliteDriver(connection);
+            case "@journeyapps/sqlcipher":
+                return new SqliteDriver(connection);
             case "better-sqlite3":
                 return new BetterSqlite3Driver(connection);
             case "cordova":

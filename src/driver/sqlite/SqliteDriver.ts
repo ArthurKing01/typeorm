@@ -129,7 +129,12 @@ export class SqliteDriver extends AbstractSqliteDriver {
      */
     protected loadDependencies(): void {
         try {
-            this.sqlite = PlatformTools.load("sqlite3").verbose();
+            if (this.options.database === 'sqlite') {
+                this.sqlite = PlatformTools.load("sqlite3").verbose();
+            } else if (this.options.database === '@journeyapps/sqlcipher') {
+                this.sqlite = PlatformTools.load("@journeyapps/sqlcipher").verbase()
+            }
+            
 
         } catch (e) {
             throw new DriverPackageNotInstalledError("SQLite", "sqlite3");
