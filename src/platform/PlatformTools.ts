@@ -107,6 +107,8 @@ export class PlatformTools {
                 case "sqlite3":
                     return require("sqlite3");
 
+                case "@journeyapps/sqlcipher":
+                    return require("@journeyapps/sqlcipher");
                 /**
                 * sql.js
                 */
