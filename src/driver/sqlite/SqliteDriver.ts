@@ -132,8 +132,7 @@ export class SqliteDriver extends AbstractSqliteDriver {
             if (this.options.type === 'sqlite') {
                 this.sqlite = PlatformTools.load("sqlite3").verbose();
             } else if (this.options.type === '@journeyapps/sqlcipher') {
-                debugger
-                this.sqlite = PlatformTools.load("@journeyapps/sqlcipher").verbase()
+                this.sqlite = PlatformTools.load("@journeyapps/sqlcipher").verbose()
             }
             
 
